@@ -11,6 +11,11 @@ Usage
 import github.com/SamWhited/go-sass
 ```
 
+ToDo
+----
+
+Actually make this work. It doesn't really do much right now.
+
 [sass]: http://sass-lang.com/
 [libsass]: http://libsass.org/
 [libsass_source]: https://github.com/hcatlin/libsass
