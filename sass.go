@@ -7,74 +7,43 @@ package sass
 // #cgo LDFLAGS: -lsass
 /*
 #include <sass_interface.h>
+#include <stdlib.h>
+void set_source(char* source_string, struct sass_context* ctx) {
+	ctx->source_string = source_string;
+}
+void set_options(struct sass_options options, struct sass_context* ctx) {
+	options.output_style = SASS_STYLE_NESTED;
+	options.source_comments = 0;
+	options.image_path = "images";
+	options.include_paths = "";
+
+	ctx->options = options;
+}
+char* get_output(struct sass_context* ctx) {
+	return ctx->output_string;
+}
 */
 import "C"
+import "unsafe"
 
-// Libsass provides three sass context structs which are used to define
-// different execution parameters for sass. The Context struct is used for
-// string-in-string-out compilation.
-type Context struct {
-	ctx *C.struct_sass_context
+// Compile the given sass string.
+func Compile(source string) (string, error) {
+	var (
+		ctx     *C.struct_sass_context
+		options C.struct_sass_options
+	)
+	ctx = C.sass_new_context()
+	C.set_options(options, ctx)
+	_, err := C.sass_compile(ctx)
+	out := C.GoString(C.get_output(ctx))
+	C.sass_free_context(ctx)
+	return out, err
 }
 
-// The file context struct is used for file-based compilation.
-type FileContext struct {
-	ctx *C.struct_sass_file_context
-}
-
-// The folder context struct is used for full-folder multi-file compilation.
-type FolderContext struct {
-	ctx *C.struct_sass_folder_context
-}
-
-// NewContext creates a new context for string-in-string-out compilation.
-func NewContext() (c Context, err error) {
-	c.ctx, err = C.sass_new_context()
-	return
-}
-
-// NewFileContext is used for creating a new context for file-based compilation.
-func NewFileContext() (c FileContext, err error) {
-	c.ctx, err = C.sass_new_file_context()
-	return
-}
-
-// NewFolderContext creates a new context for full-folder multi-file
-// compilation.
-func NewFolderContext() (c FolderContext, err error) {
-	c.ctx, err = C.sass_new_folder_context()
-	return
-}
-
-// Free manually frees the memory used by a context.
-func (c Context) Free() (err error) {
-	_, err = C.sass_free_context(c.ctx)
-	return
-}
-
-func (c FileContext) Free() (err error) {
-	_, err = C.sass_free_file_context(c.ctx)
-	return
-}
-
-func (c FolderContext) Free() (err error) {
-	_, err = C.sass_free_folder_context(c.ctx)
-	return
-}
-
-// Compile performs the actual compilation of the sass described by the
-// context.
-func (c Context) Compile() (int, error) {
-	i, err := C.sass_compile(c.ctx)
-	return int(i), err
-}
-
-func (c FileContext) Compile() (int, error) {
-	i, err := C.sass_compile_file(c.ctx)
-	return int(i), err
-}
-
-func (c FolderContext) Compile() (int, error) {
-	i, err := C.sass_compile_folder(c.ctx)
-	return int(i), err
+// Sets the source for the given context.
+func (ctx *_Ctype_struct_sass_context) setSource(source string) error {
+	source_string := C.CString(source)
+	_, err := C.set_source(source_string, ctx)
+	C.free(unsafe.Pointer(source_string))
+	return err
 }
