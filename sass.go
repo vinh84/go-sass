@@ -31,12 +31,20 @@ func Compile(source string) (string, error) {
 	var (
 		ctx     *C.struct_sass_context
 		options C.struct_sass_options
+		ret     *C.char
 	)
+
 	ctx = C.sass_new_context()
+	// TODO: Create a Go options struct and convert it
 	C.set_options(options, ctx)
+	C.set_source(C.CString(source), ctx)
 	_, err := C.sass_compile(ctx)
-	out := C.GoString(C.get_output(ctx))
+	ret = C.get_output(ctx)
+	out := C.GoString(ret)
+	
+	// Free memory used by C constructs
 	C.sass_free_context(ctx)
+
 	return out, err
 }
 
