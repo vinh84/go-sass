@@ -26,6 +26,26 @@ char* get_output(struct sass_context* ctx) {
 import "C"
 import "unsafe"
 
+const (
+	SASS_STYLE_NESTED = iota
+	SASS_STYLE_EXPANDED
+	SASS_STYLE_COMPACT
+	SASS_STYLE_COMPRESSED
+)
+
+const (
+	SASS_SOURCE_COMMENTS_NONE = iota
+	SASS_SOURCE_COMMENTS_DEFAULT
+	SASS_SOURCE_COMMENTS_MAP
+)
+
+type Options struct {
+	output_style    int
+	source_comments int
+	include_paths   string
+	image_path      string
+}
+
 // Compile the given sass string.
 func Compile(source string) (string, error) {
 	var (
@@ -41,7 +61,7 @@ func Compile(source string) (string, error) {
 	_, err := C.sass_compile(ctx)
 	ret = C.get_output(ctx)
 	out := C.GoString(ret)
-	
+
 	// Free memory used by C constructs
 	C.sass_free_context(ctx)
 
