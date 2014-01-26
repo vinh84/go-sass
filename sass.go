@@ -12,12 +12,16 @@ void set_source(char* source_string, struct sass_context* ctx) {
 	ctx->source_string = source_string;
 }
 void set_options(struct sass_options options, struct sass_context* ctx) {
-	options.output_style = SASS_STYLE_NESTED;
-	options.source_comments = 0;
-	options.image_path = "images";
-	options.include_paths = "";
-
 	ctx->options = options;
+}
+struct sass_options create_options(int output_style, int source_comments, char* image_path, char* include_paths) {
+	struct sass_options options;
+	options.output_style = output_style;
+	options.source_comments = source_comments;
+	options.image_path = image_path;
+	options.include_paths = include_paths;
+
+	return options;
 }
 char* get_output(struct sass_context* ctx) {
 	return ctx->output_string;
@@ -27,43 +31,51 @@ import "C"
 import "unsafe"
 
 const (
-	SASS_STYLE_NESTED = iota
-	SASS_STYLE_EXPANDED
-	SASS_STYLE_COMPACT
-	SASS_STYLE_COMPRESSED
+	STYLE_NESTED = iota
+	STYLE_EXPANDED
+	STYLE_COMPACT
+	STYLE_COMPRESSED
 )
 
 const (
-	SASS_SOURCE_COMMENTS_NONE = iota
-	SASS_SOURCE_COMMENTS_DEFAULT
-	SASS_SOURCE_COMMENTS_MAP
+	SOURCE_COMMENTS_NONE = iota
+	SOURCE_COMMENTS_DEFAULT
+	SOURCE_COMMENTS_MAP
 )
 
-type Options struct {
+type options struct {
 	output_style    int
 	source_comments int
 	include_paths   string
 	image_path      string
 }
 
+// Returns a new options struct with the defaults initialized
+func NewOptions() options {
+	return options{
+		output_style:    STYLE_NESTED,
+		source_comments: SOURCE_COMMENTS_NONE,
+		include_paths:   "",
+		image_path:      "images",
+	}
+}
+
 // Compile the given sass string.
-func Compile(source string) (string, error) {
+func Compile(source string, opts options) (string, error) {
 	var (
-		ctx     *C.struct_sass_context
-		options C.struct_sass_options
-		ret     *C.char
+		ctx *C.struct_sass_context
+		ret *C.char
 	)
 
 	ctx = C.sass_new_context()
-	// TODO: Create a Go options struct and convert it
-	C.set_options(options, ctx)
-	C.set_source(C.CString(source), ctx)
+	defer C.sass_free_context(ctx)
+	defer C.free(unsafe.Pointer(ret))
+
+	ctx.setOptions(opts)
+	ctx.setSource(source)
 	_, err := C.sass_compile(ctx)
 	ret = C.get_output(ctx)
 	out := C.GoString(ret)
-
-	// Free memory used by C constructs
-	C.sass_free_context(ctx)
 
 	return out, err
 }
@@ -72,6 +84,24 @@ func Compile(source string) (string, error) {
 func (ctx *_Ctype_struct_sass_context) setSource(source string) error {
 	source_string := C.CString(source)
 	_, err := C.set_source(source_string, ctx)
-	C.free(unsafe.Pointer(source_string))
+	return err
+}
+
+// Sets the options for the given context
+func (ctx *_Ctype_struct_sass_context) setOptions(opts options) error {
+	var (
+		coptions C.struct_sass_options
+		cim      = C.CString(opts.image_path)
+		cin      = C.CString(opts.include_paths)
+		cos      = C.int(opts.output_style)
+		csc      = C.int(opts.source_comments)
+	)
+
+	coptions, err := C.create_options(cos, csc, cim, cin)
+	if err != nil {
+		return err
+	}
+	_, err = C.set_options(coptions, ctx)
+
 	return err
 }
