@@ -14,10 +14,17 @@ void set_source(char* source_string, struct sass_context* ctx) {
 void set_file_path(char* input_path, struct sass_file_context* ctx) {
 	ctx->input_path = input_path;
 }
+void set_folder_paths(char* search_path, char* output_path, struct sass_folder_context* ctx) {
+	ctx->search_path = search_path;
+	ctx->output_path = output_path;
+}
 void set_options(struct sass_options options, struct sass_context* ctx) {
 	ctx->options = options;
 }
 void set_file_options(struct sass_options options, struct sass_file_context* ctx) {
+	ctx->options = options;
+}
+void set_folder_options(struct sass_options options, struct sass_folder_context* ctx) {
 	ctx->options = options;
 }
 struct sass_options create_options(int output_style, int source_comments, char* image_path, char* include_paths) {
@@ -109,6 +116,22 @@ func CompileFile(path string, opts options) (string, error) {
 	return out, err
 }
 
+// Compile the given directory
+func CompileDir(
+	searchPath string,
+	outPath string,
+	opts options) error {
+
+	ctx := C.sass_new_folder_context()
+	defer C.sass_free_folder_context(ctx)
+
+	ctx.setOptions(opts)
+	ctx.setPaths(searchPath, outPath)
+	_, err := C.sass_compile_folder(ctx)
+
+	return err
+}
+
 // Sets the source for the given context.
 func (ctx *_Ctype_struct_sass_context) setSource(source string) error {
 	csource := C.CString(source)
@@ -116,10 +139,19 @@ func (ctx *_Ctype_struct_sass_context) setSource(source string) error {
 	return err
 }
 
-// Sets the source for the given file context.
+// Sets the path for the given file context.
 func (ctx *_Ctype_struct_sass_file_context) setPath(path string) error {
 	cpath := C.CString(path)
 	_, err := C.set_file_path(cpath, ctx)
+	return err
+}
+
+// Sets the search path and output path for the given folder context.
+func (ctx *_Ctype_struct_sass_folder_context) setPaths(
+	searchPath string, outPath string) error {
+	cspath := C.CString(searchPath)
+	copath := C.CString(outPath)
+	_, err := C.set_folder_paths(cspath, copath, ctx)
 	return err
 }
 
@@ -144,6 +176,27 @@ func (ctx *_Ctype_struct_sass_context) setOptions(opts options) error {
 
 // Sets the options for the given file context
 func (ctx *_Ctype_struct_sass_file_context) setOptions(opts options) error {
+	coptions, err := createCOptions(opts)
+	if err != nil {
+		return err
+	}
+	_, err = C.set_file_options(coptions, ctx)
+
+	return err
+}
+
+// Sets the options for the given folder context
+func (ctx *_Ctype_struct_sass_folder_context) setOptions(opts options) error {
+	coptions, err := createCOptions(opts)
+	if err != nil {
+		return err
+	}
+	_, err = C.set_folder_options(coptions, ctx)
+
+	return err
+}
+
+func createCOptions(opts options) (C.struct_sass_options, error) {
 	var (
 		coptions C.struct_sass_options
 		cim      = C.CString(opts.image_path)
@@ -153,10 +206,5 @@ func (ctx *_Ctype_struct_sass_file_context) setOptions(opts options) error {
 	)
 
 	coptions, err := C.create_options(cos, csc, cim, cin)
-	if err != nil {
-		return err
-	}
-	_, err = C.set_file_options(coptions, ctx)
-
-	return err
+	return coptions, err
 }
