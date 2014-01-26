@@ -11,7 +11,13 @@ package sass
 void set_source(char* source_string, struct sass_context* ctx) {
 	ctx->source_string = source_string;
 }
+void set_file_path(char* input_path, struct sass_file_context* ctx) {
+	ctx->input_path = input_path;
+}
 void set_options(struct sass_options options, struct sass_context* ctx) {
+	ctx->options = options;
+}
+void set_file_options(struct sass_options options, struct sass_file_context* ctx) {
 	ctx->options = options;
 }
 struct sass_options create_options(int output_style, int source_comments, char* image_path, char* include_paths) {
@@ -24,6 +30,9 @@ struct sass_options create_options(int output_style, int source_comments, char* 
 	return options;
 }
 char* get_output(struct sass_context* ctx) {
+	return ctx->output_string;
+}
+char* get_file_output(struct sass_file_context* ctx) {
 	return ctx->output_string;
 }
 */
@@ -80,10 +89,37 @@ func Compile(source string, opts options) (string, error) {
 	return out, err
 }
 
+// Compile the given file
+func CompileFile(path string, opts options) (string, error) {
+	var (
+		ctx *C.struct_sass_file_context
+		ret *C.char
+	)
+
+	ctx = C.sass_new_file_context()
+	defer C.sass_free_file_context(ctx)
+	defer C.free(unsafe.Pointer(ret))
+
+	ctx.setOptions(opts)
+	ctx.setPath(path)
+	_, err := C.sass_compile_file(ctx)
+	ret = C.get_file_output(ctx)
+	out := C.GoString(ret)
+
+	return out, err
+}
+
 // Sets the source for the given context.
 func (ctx *_Ctype_struct_sass_context) setSource(source string) error {
-	source_string := C.CString(source)
-	_, err := C.set_source(source_string, ctx)
+	csource := C.CString(source)
+	_, err := C.set_source(csource, ctx)
+	return err
+}
+
+// Sets the source for the given file context.
+func (ctx *_Ctype_struct_sass_file_context) setPath(path string) error {
+	cpath := C.CString(path)
+	_, err := C.set_file_path(cpath, ctx)
 	return err
 }
 
@@ -102,6 +138,25 @@ func (ctx *_Ctype_struct_sass_context) setOptions(opts options) error {
 		return err
 	}
 	_, err = C.set_options(coptions, ctx)
+
+	return err
+}
+
+// Sets the options for the given file context
+func (ctx *_Ctype_struct_sass_file_context) setOptions(opts options) error {
+	var (
+		coptions C.struct_sass_options
+		cim      = C.CString(opts.image_path)
+		cin      = C.CString(opts.include_paths)
+		cos      = C.int(opts.output_style)
+		csc      = C.int(opts.source_comments)
+	)
+
+	coptions, err := C.create_options(cos, csc, cim, cin)
+	if err != nil {
+		return err
+	}
+	_, err = C.set_file_options(coptions, ctx)
 
 	return err
 }
