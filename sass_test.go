@@ -33,8 +33,7 @@ func TestCompile(t *testing.T) {
 
 func TestCompileFile(t *testing.T) {
 	const FILE = "test.sass"
-	//err := ioutil.WriteFile(FILE, []byte(".sass{.inner{color:red}}"), os.ModePerm)
-	fhandle, err := os.OpenFile(FILE, os.O_RDWR, os.ModePerm)
+	fhandle, err := os.Create(FILE)
 	defer func() {
 		fhandle.Close()
 		os.Remove(FILE)
