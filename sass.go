@@ -101,7 +101,7 @@ func Compile(source string, opts options) (string, error) {
 	return out, err
 }
 
-// Compile the given file
+// Compile the given file.
 func CompileFile(path string, opts options) (string, error) {
 	var (
 		ctx *C.struct_sass_file_context
@@ -121,7 +121,7 @@ func CompileFile(path string, opts options) (string, error) {
 	return out, err
 }
 
-// Compile the given directory
+// Compile the given directory.
 func CompileDir(
 	searchPath string,
 	outPath string,
@@ -137,21 +137,21 @@ func CompileDir(
 	return err
 }
 
-// Sets the source for the given context.
+// Sets the source for the given libsass context.
 func (ctx *_Ctype_struct_sass_context) setSource(source string) error {
 	csource := C.CString(source)
 	_, err := C.set_source(csource, ctx)
 	return err
 }
 
-// Sets the path for the given file context.
+// Sets the path for the given libsass file context.
 func (ctx *_Ctype_struct_sass_file_context) setPath(path string) error {
 	cpath := C.CString(path)
 	_, err := C.set_file_path(cpath, ctx)
 	return err
 }
 
-// Sets the search path and output path for the given folder context.
+// Sets the search path and output path for the given libsass folder context.
 func (ctx *_Ctype_struct_sass_folder_context) setPaths(
 	searchPath string, outPath string) error {
 	cspath := C.CString(searchPath)
@@ -160,7 +160,7 @@ func (ctx *_Ctype_struct_sass_folder_context) setPaths(
 	return err
 }
 
-// Sets the options for the given context
+// Sets the libsass options for the given context.
 func (ctx *_Ctype_struct_sass_context) setOptions(opts options) error {
 	var (
 		coptions C.struct_sass_options
@@ -179,7 +179,7 @@ func (ctx *_Ctype_struct_sass_context) setOptions(opts options) error {
 	return err
 }
 
-// Sets the options for the given file context
+// Sets the libsass options for the given file context.
 func (ctx *_Ctype_struct_sass_file_context) setOptions(opts options) error {
 	coptions, err := createCOptions(opts)
 	if err != nil {
@@ -190,7 +190,7 @@ func (ctx *_Ctype_struct_sass_file_context) setOptions(opts options) error {
 	return err
 }
 
-// Sets the options for the given folder context
+// Sets the libsass options for the given folder context.
 func (ctx *_Ctype_struct_sass_folder_context) setOptions(opts options) error {
 	coptions, err := createCOptions(opts)
 	if err != nil {
@@ -201,6 +201,7 @@ func (ctx *_Ctype_struct_sass_folder_context) setOptions(opts options) error {
 	return err
 }
 
+// Create a C options struct for libsass from some Go options.
 func createCOptions(opts options) (C.struct_sass_options, error) {
 	var (
 		coptions C.struct_sass_options
