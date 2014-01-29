@@ -121,7 +121,7 @@ func CompileFile(path string, opts options) (string, error) {
 	return out, err
 }
 
-// Compile the given directory.
+// Compile all sass/scss files in the given directory.
 func CompileDir(
 	searchPath string,
 	outPath string,
