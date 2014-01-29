@@ -2,6 +2,8 @@
 // Use of this source code is governed by the MIT
 // license which can be found in the LICENSE file.
 
+// Package sass provides a cgo wrapper for libsass which can be used to compile
+// SASS and SCSS to CSS.
 package sass
 
 // #cgo LDFLAGS: -lsass
@@ -46,6 +48,7 @@ char* get_file_output(struct sass_file_context* ctx) {
 import "C"
 import "unsafe"
 
+// Output CSS styles for compiling SASS.
 const (
 	STYLE_NESTED = iota
 	STYLE_EXPANDED
@@ -53,12 +56,14 @@ const (
 	STYLE_COMPRESSED
 )
 
+// Output style for comments.
 const (
 	SOURCE_COMMENTS_NONE = iota
 	SOURCE_COMMENTS_DEFAULT
 	SOURCE_COMMENTS_MAP
 )
 
+// A set of options to pass to the SASS compiler.
 type options struct {
 	output_style    int
 	source_comments int
@@ -66,7 +71,7 @@ type options struct {
 	image_path      string
 }
 
-// Returns a new options struct with the defaults initialized
+// Returns a new options struct with the defaults initialized.
 func NewOptions() options {
 	return options{
 		output_style:    STYLE_NESTED,
