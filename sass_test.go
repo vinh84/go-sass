@@ -1,7 +1,6 @@
 package sass
 
 import (
-	"os"
 	"strings"
 	"testing"
 )
@@ -32,23 +31,7 @@ func TestCompile(t *testing.T) {
 }
 
 func TestCompileFile(t *testing.T) {
-	const FILE = "test.sass"
-	fhandle, err := os.Create(FILE)
-	defer func() {
-		fhandle.Close()
-		os.Remove(FILE)
-	}()
-	if err != nil {
-		t.Fatal("Failed to open test file for writing, test could not be run", err)
-	}
-	_, err = fhandle.WriteString(".sass{.inner{color:red}}")
-	if err != nil {
-		t.Fatal("Failed to write test file, test could not be run", err)
-	}
-	err = fhandle.Sync()
-	if err != nil {
-		t.Fatal("Failed to sync test file, test could not be run", err)
-	}
+	const FILE = "test/test.sass"
 	out, err := CompileFile(FILE, NewOptions())
 	switch {
 	case err != nil:
