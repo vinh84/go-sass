@@ -1,6 +1,8 @@
 Go Sass
 =======
 
+[![Build Status](https://travis-ci.org/SamWhited/go-sass.png)](https://travis-ci.org/SamWhited/go-sass)
+
 An implementation of [Sass][sass] for Go which wraps the [Libsass][libsass] C
 [library][libsass_source].
 

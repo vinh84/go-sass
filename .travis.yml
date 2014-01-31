@@ -1,0 +1,7 @@
+language: go
+go:
+  - tip
+before_script: bin/ci/before_script
+script:
+  - go test
+  - go build
