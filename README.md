@@ -14,7 +14,7 @@ import github.com/SamWhited/go-sass
 ToDo
 ----
 
-Actually make this work. It doesn't really do much right now.
+  - Fix folder compilation
 
 [sass]: http://sass-lang.com/
 [libsass]: http://libsass.org/
