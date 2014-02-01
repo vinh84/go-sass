@@ -11,5 +11,5 @@ before_install:
   - sudo cp sass.h /usr/local/include/
   - cd ..
 script:
-  - go test
+  - LD_RUN_PATH=/usr/local/lib:$LD_RUN_PATH go test
   - go build
