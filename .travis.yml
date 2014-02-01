@@ -6,7 +6,7 @@ before_install:
   - cd libsass
   - autoreconf -i
   - ./configure
-  - make && make shared && sudo make install && sudo make install-shared
+  - make && sudo make install
   - sudo cp sass_interface.h  /usr/include/
   - sudo cp sass.h /usr/local/include/
   - cd ..
