@@ -5,7 +5,8 @@ before_install:
   - git clone git://github.com/hcatlin/libsass.git
   - cd libsass
   - make && sudo make install
-  - sudo cp *.* /usr/include
+  - sudo cp sass_interface.h  /usr/include/
+  - sudo cp sass.h /usr/local/include/
   - cd ..
 script:
   - go test
