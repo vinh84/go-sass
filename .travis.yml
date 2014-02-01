@@ -1,7 +1,11 @@
 language: go
 go:
   - tip
-before_install: bin/ci/before_install
+before_install:
+  - git clone git://github.com/hcatlin/libsass.git
+  - cd libsass
+  - make && sudo make install
+  - sudo cp *.* /usr/include
 script:
   - go test
   - go build
