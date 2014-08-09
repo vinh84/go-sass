@@ -111,7 +111,7 @@ func Compile(source string, opts options) (string, error) {
 	errormessage := C.get_error_message(ctx)
 	
 	if (errorstatus) {
-		err = errors.New(errormessage)
+		err = errors.New(C.GoString(errormessage))
 	}
 	
 	out := C.GoString(ret)
