@@ -38,15 +38,26 @@ struct sass_options create_options(int output_style, int source_comments, char* 
 
 	return options;
 }
+
 char* get_output(struct sass_context* ctx) {
 	return ctx->output_string;
 }
+
+int get_error_status(struct sass_context* ctx) {
+	return ctx->error_status;
+}
+
+char* get_error_message(struct sass_context* ctx) {
+	return ctx->error_message;
+}
+
 char* get_file_output(struct sass_file_context* ctx) {
 	return ctx->output_string;
 }
 */
 import "C"
 import "unsafe"
+import "errors"
 
 // Output CSS styles for compiling SASS.
 const (
@@ -96,6 +107,13 @@ func Compile(source string, opts options) (string, error) {
 	ctx.setSource(source)
 	_, err := C.sass_compile(ctx)
 	ret = C.get_output(ctx)
+	errorstatus := C.get_error_status(ctx)
+	errormessage := C.get_errror_message(ctx)
+	
+	if (errorstatus) {
+		err = errors.New(errormessage)
+	}
+	
 	out := C.GoString(ret)
 
 	return out, err
