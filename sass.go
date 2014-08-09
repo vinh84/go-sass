@@ -108,7 +108,7 @@ func Compile(source string, opts options) (string, error) {
 	_, err := C.sass_compile(ctx)
 	ret = C.get_output(ctx)
 	errorstatus := C.get_error_status(ctx)
-	errormessage := C.get_errror_message(ctx)
+	errormessage := C.get_error_message(ctx)
 	
 	if (errorstatus) {
 		err = errors.New(errormessage)
