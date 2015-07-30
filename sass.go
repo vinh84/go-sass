@@ -33,7 +33,7 @@ struct sass_options create_options(int output_style, int source_comments, char* 
 	struct sass_options options;
 	options.output_style = output_style;
 	options.source_comments = source_comments;
-	options.image_path = image_path;
+	//options.image_path = image_path;
 	options.include_paths = include_paths;
 
 	return options;
